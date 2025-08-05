@@ -8,15 +8,17 @@ class AppColors {
   static const Color lightBlue = Color(0xFF60A5FA);
 
   // Background gradient colors
-  static const Color gradientStart = Color(0xFF1E3A8A);
-  static const Color gradientEnd = Color(0xFF3B82F6);
+  static const Color gradientStart = Color(0xFF0C1D4D);
+  static const Color gradientEnd = Color(0xFF214ECC);
 
   // Card colors
-  static const Color cardBackground = Color(0xFF2563EB);
+  static const Color cardBackground = Color(
+    0x14FFFFFF,
+  ); // rgba(255, 255, 255, 0.08)
   static const Color cardBackgroundDark = Color(0xFF1D4ED8);
 
   // Accent colors
-  static const Color yellowAccent = Color(0xFFFBBF24);
+  static const Color yellowAccent = Color(0xFFFFC629);
   static const Color orangeAccent = Color(0xFFF97316);
 
   // Text colors

@@ -7,7 +7,6 @@ import '../../models/task_model.dart';
 import '../../bloc/timer_bloc.dart';
 import '../../bloc/timer_event.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
 
 class TimerCard extends StatefulWidget {
   final TimerModel timer;
@@ -28,111 +27,106 @@ class _TimerCardState extends State<TimerCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: IntrinsicHeight(
         child: Row(
           children: [
             // Yellow accent line
-            Container(
-              width: 4,
-              decoration: const BoxDecoration(
-                color: AppColors.yellowAccent,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  bottomLeft: Radius.circular(16),
-                ),
-              ),
-            ),
+
             // Card content
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    // Header row with favorite icon
-                    Row(
-                      children: [
-                        // Favorite icon
-                        Icon(
-                          widget.timer.isFavorite
-                              ? Icons.star
-                              : Icons.star_outline,
-                          color:
-                              widget.timer.isFavorite
-                                  ? AppColors.favoriteColor
-                                  : AppColors.textSecondary,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        // Task title
-                        Expanded(
-                          child: Text(
-                            widget.task?.name ?? 'Unknown Task',
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        // Timer display and controls
-                        _buildTimerControls(context),
-                      ],
+                    Container(
+                      width: 2,
+                      decoration: BoxDecoration(
+                        color: AppColors.yellowAccent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
-
-                    const SizedBox(height: 8),
-
-                    // Project info row
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.folder_outlined,
-                          color: AppColors.textSecondary,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          widget.project?.name ?? 'Unknown Project',
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 14,
+                    SizedBox(width: 10),
+                    // Left side content
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Star icon and task title
+                          Row(
+                            children: [
+                              Icon(
+                                widget.timer.isFavorite
+                                    ? Icons.star
+                                    : Icons.star_outline,
+                                color: AppColors.textPrimary,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  widget.task?.name ?? 'iOS app deployment',
+                                  style: const TextStyle(
+                                    color: AppColors.textPrimary,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.15,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    // Deadline row
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.schedule,
-                          color: AppColors.textSecondary,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Deadline ${_formatDate(DateTime.now().add(const Duration(days: 30)))}',
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 14,
+                          const SizedBox(height: 4),
+                          // Project info
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.folder_outlined,
+                                color: AppColors.textPrimary,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                widget.project?.name ?? 'SO056 - Booqio V2',
+                                style: const TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  letterSpacing: 0.25,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          // Deadline
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.schedule,
+                                color: AppColors.textPrimary,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Deadline 07/20/2023',
+                                style: const TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  letterSpacing: 0.25,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
+                    // Right side - Timer controls
+                    _buildTimerControls(context),
                   ],
                 ),
               ),
@@ -148,7 +142,7 @@ class _TimerCardState extends State<TimerCard> {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.completedColor.withOpacity(0.2),
+          color: AppColors.completedColor.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(12),
         ),
         child: const Text(
@@ -172,23 +166,29 @@ class _TimerCardState extends State<TimerCard> {
           },
           child: Container(
             key: _timerKey,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.timerBackground,
-              borderRadius: BorderRadius.circular(20),
+              color:
+                  widget.timer.isRunning
+                      ? AppColors.timerBackground
+                      : AppColors.cardBackground,
+              borderRadius: BorderRadius.circular(64),
             ),
             child: Text(
               _formatDuration(widget.timer.elapsed),
-              style: const TextStyle(
-                color: AppColors.timerText,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'monospace',
+              style: TextStyle(
+                color:
+                    widget.timer.isRunning
+                        ? AppColors.timerText
+                        : AppColors.textPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.1,
               ),
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 4),
         // Play/Pause button
         GestureDetector(
           onTap: () {
@@ -202,13 +202,16 @@ class _TimerCardState extends State<TimerCard> {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: AppColors.timerBackground,
+              color: Colors.transparent,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
               widget.timer.isRunning ? Icons.pause : Icons.play_arrow,
-              color: AppColors.timerText,
-              size: 20,
+              color:
+                  widget.timer.isRunning
+                      ? AppColors.timerText
+                      : AppColors.textPrimary,
+              size: 24,
             ),
           ),
         ),
@@ -221,10 +224,6 @@ class _TimerCardState extends State<TimerCard> {
     final hours = twoDigits(duration.inHours);
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     return '$hours:$minutes';
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
   String _formatFullDuration(Duration duration) {
@@ -349,7 +348,7 @@ class _DynamicTooltipState extends State<_DynamicTooltip> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),

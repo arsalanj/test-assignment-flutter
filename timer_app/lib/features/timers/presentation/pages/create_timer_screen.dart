@@ -343,7 +343,7 @@ class _CreateTimerScreenState extends State<CreateTimerScreen> {
   void _showProjectPicker(BuildContext context, List<ProjectModel> projects) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.cardBackground,
+      backgroundColor: AppColors.gradientEnd,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -383,7 +383,7 @@ class _CreateTimerScreenState extends State<CreateTimerScreen> {
   void _showTaskPicker(BuildContext context, List<TaskModel> tasks) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.cardBackground,
+      backgroundColor: AppColors.gradientEnd,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),

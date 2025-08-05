@@ -25,63 +25,73 @@ class TimerListScreen extends StatelessWidget {
             children: [
               // Custom App Bar
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Expanded(
-                      child: Text(
-                        'Timesheets',
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    // Upload button (placeholder)
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: AppColors.cardBackground,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.upload,
+                    const Text(
+                      'Timesheets',
+                      style: TextStyle(
                         color: AppColors.textPrimary,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w700,
+                        fontFamily: 'Inter',
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    // Add button
-                    GestureDetector(
-                      onTap: () => context.go('/timers/create'),
-                      child: Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: AppColors.cardBackground,
-                          borderRadius: BorderRadius.circular(12),
+                    Row(
+                      children: [
+                        // Upload button (placeholder)
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: AppColors.cardBackground,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.upload,
+                            color: AppColors.textPrimary,
+                            size: 24,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.add,
-                          color: AppColors.textPrimary,
+                        const SizedBox(width: 8),
+                        // Add button
+                        GestureDetector(
+                          onTap: () => context.go('/timers/create'),
+                          child: Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: AppColors.cardBackground,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.add,
+                              color: AppColors.textPrimary,
+                              size: 24,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
               ),
 
               // Tab Bar
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
                 child: Row(
                   children: [
-                    _buildTab('Favorites', true),
-                    const SizedBox(width: 32),
-                    _buildTab('Odoo', false),
-                    const SizedBox(width: 32),
-                    _buildTab('Local', false),
+                    Expanded(child: _buildTab('Favorites', false)),
+                    Expanded(child: _buildTab('Odoo', true)),
+                    Expanded(child: _buildTab('Local', false)),
                   ],
                 ),
               ),
@@ -249,23 +259,31 @@ class TimerListScreen extends StatelessWidget {
   }
 
   Widget _buildTab(String title, bool isSelected) {
-    return Column(
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
-            fontSize: 16,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color:
+                isSelected
+                    ? AppColors.textPrimary
+                    : AppColors.textPrimary.withValues(alpha: 0.16),
+            width: isSelected ? 2.0 : 1.0,
           ),
         ),
-        const SizedBox(height: 8),
-        Container(
-          height: 2,
-          width: 40,
-          color: isSelected ? AppColors.textPrimary : Colors.transparent,
+      ),
+      child: Center(
+        child: Text(
+          title,
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.1,
+            fontFamily: 'Inter',
+          ),
         ),
-      ],
+      ),
     );
   }
 }
