@@ -6,6 +6,7 @@ import '../../bloc/timer_state.dart';
 import '../../bloc/timer_event.dart';
 import '../../models/project_model.dart';
 import '../../models/task_model.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class CreateTimerScreen extends StatefulWidget {
   const CreateTimerScreen({super.key});
@@ -67,130 +68,343 @@ class _CreateTimerScreenState extends State<CreateTimerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Timer'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/timers'),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppColors.gradientStart, AppColors.gradientEnd],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Custom App Bar
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => context.go('/timers'),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBackground,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    const Expanded(
+                      child: Text(
+                        'Create Timer',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Form Content
+              Expanded(
+                child: BlocBuilder<TimerBloc, TimerState>(
+                  builder: (context, state) {
+                    if (state is! TimerLoaded) {
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.textPrimary,
+                        ),
+                      );
+                    }
+
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const SizedBox(height: 24),
+
+                            // Project Dropdown
+                            _buildDropdownField(
+                              label: 'Project',
+                              value: _selectedProject?.name,
+                              onTap:
+                                  () => _showProjectPicker(
+                                    context,
+                                    state.projects,
+                                  ),
+                              validator:
+                                  _selectedProject == null
+                                      ? 'Please select a project'
+                                      : null,
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            // Task Dropdown
+                            _buildDropdownField(
+                              label: 'Task',
+                              value: _selectedTask?.name,
+                              onTap:
+                                  _selectedProject == null
+                                      ? null
+                                      : () => _showTaskPicker(
+                                        context,
+                                        _availableTasks,
+                                      ),
+                              validator:
+                                  _selectedTask == null
+                                      ? 'Please select a task'
+                                      : null,
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            // Description Field
+                            _buildTextField(
+                              label: 'Description',
+                              controller: _descriptionController,
+                              maxLines: 4,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter a description';
+                                }
+                                return null;
+                              },
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // Make Favorite Toggle
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _isFavorite = !_isFavorite;
+                                });
+                              },
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    _isFavorite
+                                        ? Icons.keyboard_arrow_down
+                                        : Icons.keyboard_arrow_right,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    'Make Favorite',
+                                    style: TextStyle(
+                                      color: AppColors.textPrimary,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 60),
+
+                            // Create Timer Button
+                            Container(
+                              width: double.infinity,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: AppColors.buttonBackground,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: ElevatedButton(
+                                onPressed: _createTimer,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Create Timer',
+                                  style: TextStyle(
+                                    color: AppColors.buttonText,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-      body: BlocBuilder<TimerBloc, TimerState>(
-        builder: (context, state) {
-          if (state is! TimerLoaded) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    );
+  }
 
-          return SingleChildScrollView(
+  Widget _buildDropdownField({
+    required String label,
+    String? value,
+    VoidCallback? onTap,
+    String? validator,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(12),
+          border:
+              validator != null
+                  ? Border.all(color: Colors.red, width: 1)
+                  : null,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                value ?? label,
+                style: TextStyle(
+                  color:
+                      value != null
+                          ? AppColors.textPrimary
+                          : AppColors.textSecondary,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    int maxLines = 1,
+    String? Function(String?)? validator,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: TextFormField(
+        controller: controller,
+        maxLines: maxLines,
+        style: const TextStyle(color: AppColors.textPrimary, fontSize: 16),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: AppColors.textSecondary),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Colors.transparent,
+          contentPadding: const EdgeInsets.all(16),
+        ),
+        validator: validator,
+      ),
+    );
+  }
+
+  void _showProjectPicker(BuildContext context, List<ProjectModel> projects) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.cardBackground,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder:
+          (context) => Container(
             padding: const EdgeInsets.all(16),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Project Dropdown
-                  DropdownButtonFormField<ProjectModel>(
-                    value: _selectedProject,
-                    decoration: const InputDecoration(
-                      labelText: 'Select Project',
-                      border: OutlineInputBorder(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Select Project',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ...projects.map(
+                  (project) => ListTile(
+                    title: Text(
+                      project.name,
+                      style: const TextStyle(color: AppColors.textPrimary),
                     ),
-                    items:
-                        state.projects.map((project) {
-                          return DropdownMenuItem(
-                            value: project,
-                            child: Text(project.name),
-                          );
-                        }).toList(),
-                    onChanged: _onProjectChanged,
-                    validator: (value) {
-                      if (value == null) {
-                        return 'Please select a project';
-                      }
-                      return null;
+                    onTap: () {
+                      _onProjectChanged(project);
+                      Navigator.pop(context);
                     },
                   ),
+                ),
+              ],
+            ),
+          ),
+    );
+  }
 
-                  const SizedBox(height: 16),
-
-                  // Task Dropdown
-                  DropdownButtonFormField<TaskModel>(
-                    value: _selectedTask,
-                    decoration: const InputDecoration(
-                      labelText: 'Select Task',
-                      border: OutlineInputBorder(),
+  void _showTaskPicker(BuildContext context, List<TaskModel> tasks) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.cardBackground,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder:
+          (context) => Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Select Task',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ...tasks.map(
+                  (task) => ListTile(
+                    title: Text(
+                      task.name,
+                      style: const TextStyle(color: AppColors.textPrimary),
                     ),
-                    items:
-                        _availableTasks.map((task) {
-                          return DropdownMenuItem(
-                            value: task,
-                            child: Text(task.name),
-                          );
-                        }).toList(),
-                    onChanged: (task) {
+                    onTap: () {
                       setState(() {
                         _selectedTask = task;
                       });
-                    },
-                    validator: (value) {
-                      if (value == null) {
-                        return 'Please select a task';
-                      }
-                      return null;
+                      Navigator.pop(context);
                     },
                   ),
-
-                  const SizedBox(height: 16),
-
-                  // Description Field
-                  TextFormField(
-                    controller: _descriptionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Timer Description',
-                      border: OutlineInputBorder(),
-                      hintText: 'What are you working on?',
-                    ),
-                    maxLines: 3,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter a description';
-                      }
-                      return null;
-                    },
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Favorite Checkbox
-                  CheckboxListTile(
-                    title: const Text('Mark as Favorite'),
-                    value: _isFavorite,
-                    onChanged: (value) {
-                      setState(() {
-                        _isFavorite = value ?? false;
-                      });
-                    },
-                    controlAffinity: ListTileControlAffinity.leading,
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Create Button
-                  ElevatedButton(
-                    onPressed: _createTimer,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: const Text(
-                      'Create & Start Timer',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          );
-        },
-      ),
+          ),
     );
   }
 }

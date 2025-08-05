@@ -20,14 +20,14 @@ class AppRouter {
         path: '/task/:taskId/details',
         builder: (context, state) {
           final taskId = state.pathParameters['taskId']!;
-          return TaskDetailsScreen(taskId: taskId, initialTab: 'details');
+          return TaskDetailsScreen(taskId: taskId, tab: 'details');
         },
       ),
       GoRoute(
         path: '/task/:taskId/timesheets',
         builder: (context, state) {
           final taskId = state.pathParameters['taskId']!;
-          return TaskDetailsScreen(taskId: taskId, initialTab: 'timesheets');
+          return TaskDetailsScreen(taskId: taskId, tab: 'timesheets');
         },
       ),
     ],

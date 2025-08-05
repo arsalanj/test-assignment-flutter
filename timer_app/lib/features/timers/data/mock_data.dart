@@ -15,6 +15,8 @@ final mockTasks = [
     projectId: 'p1',
     deadline: DateTime.now().add(const Duration(days: 7)),
     assignedTo: 'John Doe',
+    description:
+        'Create reusable UI components for the mobile application including buttons, cards, and navigation elements.',
   ),
   TaskModel(
     id: 't2',
@@ -22,6 +24,8 @@ final mockTasks = [
     projectId: 'p1',
     deadline: DateTime.now().add(const Duration(days: 5)),
     assignedTo: 'Jane Smith',
+    description:
+        'Implement REST API endpoints for user authentication, data management, and real-time synchronization.',
   ),
   TaskModel(
     id: 't3',
@@ -29,6 +33,8 @@ final mockTasks = [
     projectId: 'p2',
     deadline: DateTime.now().add(const Duration(days: 3)),
     assignedTo: 'Bob Johnson',
+    description:
+        'As a user, I would like to be able to buy a subscription, this would allow me to get a discount on the products and on the second stage of diagnosis',
   ),
   TaskModel(
     id: 't4',
@@ -36,6 +42,8 @@ final mockTasks = [
     projectId: 'p2',
     deadline: DateTime.now().add(const Duration(days: 10)),
     assignedTo: 'Alice Brown',
+    description:
+        'Design and develop a responsive landing page that showcases the product features and drives conversions.',
   ),
   TaskModel(
     id: 't5',
@@ -43,6 +51,8 @@ final mockTasks = [
     projectId: 'p3',
     deadline: DateTime.now().add(const Duration(days: 14)),
     assignedTo: 'Charlie Wilson',
+    description:
+        'Develop a comprehensive social media marketing strategy to increase brand awareness and engagement.',
   ),
 ];
 
