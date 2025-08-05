@@ -1,11 +1,12 @@
 import 'dart:async';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import '../models/timer_model.dart';
 import '../data/mock_data.dart';
+import '../../../core/config/app_config.dart';
 import 'timer_event.dart';
 import 'timer_state.dart';
 
-class TimerBloc extends Bloc<TimerEvent, TimerState> {
+class TimerBloc extends HydratedBloc<TimerEvent, TimerState> {
   Timer? _ticker;
   final Map<String, Timer> _activeTimers = {};
 
@@ -20,16 +21,36 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   }
 
   void _onLoadTimers(LoadTimers event, Emitter<TimerState> emit) {
-    emit(const TimerLoading());
-
     try {
-      emit(
-        TimerLoaded(
-          timers: List.from(mockTimers),
-          projects: mockProjects,
-          tasks: mockTasks,
-        ),
-      );
+      if (AppConfig.useMockData) {
+        // Always use mock data when flag is true
+        emit(const TimerLoading());
+        emit(
+          TimerLoaded(
+            timers: List.from(mockTimers),
+            projects: mockProjects,
+            tasks: mockTasks,
+          ),
+        );
+      } else {
+        // Check if we already have persisted data (restored by HydratedBloc)
+        if (state is TimerLoaded) {
+          // Data was already restored from HydratedBloc, don't override it
+          // Just ensure we have projects and tasks for creating new timers
+          final currentState = state as TimerLoaded;
+          if (currentState.projects.isEmpty || currentState.tasks.isEmpty) {
+            emit(
+              currentState.copyWith(projects: mockProjects, tasks: mockTasks),
+            );
+          }
+        } else {
+          // No persisted data, start with empty state but include projects/tasks for creating new timers
+          emit(const TimerLoading());
+          emit(
+            TimerLoaded(timers: [], projects: mockProjects, tasks: mockTasks),
+          );
+        }
+      }
 
       // Start tickers for running timers
       if (state is TimerLoaded) {
@@ -223,5 +244,27 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     }
     _activeTimers.clear();
     return super.close();
+  }
+
+  // HydratedBloc implementation
+  @override
+  TimerState? fromJson(Map<String, dynamic> json) {
+    try {
+      if (json['type'] == 'TimerLoaded') {
+        return TimerLoaded.fromJson(json['data'] as Map<String, dynamic>);
+      }
+      return null;
+    } catch (e) {
+      // If there's an error deserializing, return null to use initial state
+      return null;
+    }
+  }
+
+  @override
+  Map<String, dynamic>? toJson(TimerState state) {
+    if (state is TimerLoaded) {
+      return {'type': 'TimerLoaded', 'data': state.toJson()};
+    }
+    return null;
   }
 }

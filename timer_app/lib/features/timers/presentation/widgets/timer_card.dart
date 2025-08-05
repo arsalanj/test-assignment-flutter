@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/timer_model.dart';
@@ -8,12 +9,21 @@ import '../../bloc/timer_event.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
-class TimerCard extends StatelessWidget {
+class TimerCard extends StatefulWidget {
   final TimerModel timer;
   final ProjectModel? project;
   final TaskModel? task;
 
   const TimerCard({super.key, required this.timer, this.project, this.task});
+
+  @override
+  State<TimerCard> createState() => _TimerCardState();
+}
+
+class _TimerCardState extends State<TimerCard> {
+  OverlayEntry? _overlayEntry;
+  Timer? _tooltipTimer;
+  final GlobalKey _timerKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -56,9 +66,11 @@ class TimerCard extends StatelessWidget {
                       children: [
                         // Favorite icon
                         Icon(
-                          timer.isFavorite ? Icons.star : Icons.star_outline,
+                          widget.timer.isFavorite
+                              ? Icons.star
+                              : Icons.star_outline,
                           color:
-                              timer.isFavorite
+                              widget.timer.isFavorite
                                   ? AppColors.favoriteColor
                                   : AppColors.textSecondary,
                           size: 20,
@@ -67,7 +79,7 @@ class TimerCard extends StatelessWidget {
                         // Task title
                         Expanded(
                           child: Text(
-                            task?.name ?? 'Unknown Task',
+                            widget.task?.name ?? 'Unknown Task',
                             style: const TextStyle(
                               color: AppColors.textPrimary,
                               fontSize: 18,
@@ -92,7 +104,7 @@ class TimerCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          project?.name ?? 'Unknown Project',
+                          widget.project?.name ?? 'Unknown Project',
                           style: const TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 14,
@@ -132,7 +144,7 @@ class TimerCard extends StatelessWidget {
   }
 
   Widget _buildTimerControls(BuildContext context) {
-    if (timer.isCompleted) {
+    if (widget.timer.isCompleted) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
@@ -153,20 +165,26 @@ class TimerCard extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Timer display
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppColors.timerBackground,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            _formatDuration(timer.elapsed),
-            style: const TextStyle(
-              color: AppColors.timerText,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'monospace',
+        // Timer display with long press tooltip
+        GestureDetector(
+          onLongPress: () {
+            _showFullTimeTooltip(context, widget.timer.elapsed);
+          },
+          child: Container(
+            key: _timerKey,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.timerBackground,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              _formatDuration(widget.timer.elapsed),
+              style: const TextStyle(
+                color: AppColors.timerText,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'monospace',
+              ),
             ),
           ),
         ),
@@ -174,10 +192,10 @@ class TimerCard extends StatelessWidget {
         // Play/Pause button
         GestureDetector(
           onTap: () {
-            if (timer.isRunning) {
-              context.read<TimerBloc>().add(PauseTimer(timer.id));
+            if (widget.timer.isRunning) {
+              context.read<TimerBloc>().add(PauseTimer(widget.timer.id));
             } else {
-              context.read<TimerBloc>().add(StartTimer(timer.id));
+              context.read<TimerBloc>().add(StartTimer(widget.timer.id));
             }
           },
           child: Container(
@@ -188,7 +206,7 @@ class TimerCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
-              timer.isRunning ? Icons.pause : Icons.play_arrow,
+              widget.timer.isRunning ? Icons.pause : Icons.play_arrow,
               color: AppColors.timerText,
               size: 20,
             ),
@@ -207,5 +225,171 @@ class TimerCard extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  String _formatFullDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final hours = twoDigits(duration.inHours);
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$hours:$minutes:$seconds';
+  }
+
+  void _showFullTimeTooltip(BuildContext context, Duration initialElapsed) {
+    // Remove any existing tooltip
+    _hideTooltip();
+
+    final overlay = Overlay.of(context);
+    final renderBox =
+        _timerKey.currentContext?.findRenderObject() as RenderBox?;
+
+    if (renderBox == null) return;
+
+    final position = renderBox.localToGlobal(Offset.zero);
+    final size = renderBox.size;
+
+    // Create a stateful widget for the dynamic tooltip
+    _overlayEntry = OverlayEntry(
+      builder:
+          (context) => _DynamicTooltip(
+            position: position,
+            size: size,
+            timer: widget.timer,
+            onDismiss: _hideTooltip,
+          ),
+    );
+
+    overlay.insert(_overlayEntry!);
+
+    // Auto-dismiss after 3 seconds
+    Future.delayed(const Duration(seconds: 3), () {
+      _hideTooltip();
+    });
+  }
+
+  void _hideTooltip() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+    _tooltipTimer?.cancel();
+    _tooltipTimer = null;
+  }
+
+  @override
+  void dispose() {
+    _hideTooltip();
+    super.dispose();
+  }
+}
+
+class _DynamicTooltip extends StatefulWidget {
+  final Offset position;
+  final Size size;
+  final TimerModel timer;
+  final VoidCallback onDismiss;
+
+  const _DynamicTooltip({
+    required this.position,
+    required this.size,
+    required this.timer,
+    required this.onDismiss,
+  });
+
+  @override
+  State<_DynamicTooltip> createState() => _DynamicTooltipState();
+}
+
+class _DynamicTooltipState extends State<_DynamicTooltip> {
+  late Timer _updateTimer;
+  late Duration _currentElapsed;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentElapsed = widget.timer.elapsed;
+
+    // Update the tooltip every second if timer is running
+    _updateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (widget.timer.isRunning && !widget.timer.isCompleted) {
+        setState(() {
+          _currentElapsed = _currentElapsed + const Duration(seconds: 1);
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _updateTimer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        // Transparent background to capture taps
+        GestureDetector(
+          onTap: widget.onDismiss,
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            color: Colors.transparent,
+          ),
+        ),
+        // Tooltip positioned above the timer
+        Positioned(
+          left: widget.position.dx - 40,
+          top: widget.position.dy - 80,
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.cardBackground,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Full Timer Duration',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatFullDuration(_currentElapsed),
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatFullDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final hours = twoDigits(duration.inHours);
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$hours:$minutes:$seconds';
   }
 }

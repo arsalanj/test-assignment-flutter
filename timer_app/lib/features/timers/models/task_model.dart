@@ -35,6 +35,32 @@ class TaskModel extends Equatable {
     );
   }
 
+  // JSON serialization
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'projectId': projectId,
+      'deadline': deadline?.millisecondsSinceEpoch,
+      'assignedTo': assignedTo,
+      'description': description,
+    };
+  }
+
+  factory TaskModel.fromJson(Map<String, dynamic> json) {
+    return TaskModel(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      projectId: json['projectId'] as String,
+      deadline:
+          json['deadline'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(json['deadline'] as int)
+              : null,
+      assignedTo: json['assignedTo'] as String?,
+      description: json['description'] as String?,
+    );
+  }
+
   @override
   List<Object?> get props => [
     id,

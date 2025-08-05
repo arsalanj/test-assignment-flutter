@@ -186,24 +186,32 @@ class _CreateTimerScreenState extends State<CreateTimerScreen> {
 
                             const SizedBox(height: 24),
 
-                            // Make Favorite Toggle
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _isFavorite = !_isFavorite;
-                                });
-                              },
+                            // Make Favorite Checkbox
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppColors.cardBackground,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    _isFavorite
-                                        ? Icons.keyboard_arrow_down
-                                        : Icons.keyboard_arrow_right,
-                                    color: AppColors.textPrimary,
+                                  Checkbox(
+                                    value: _isFavorite,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _isFavorite = value ?? false;
+                                      });
+                                    },
+                                    activeColor: AppColors.buttonBackground,
+                                    checkColor: AppColors.buttonText,
+                                    side: const BorderSide(
+                                      color: AppColors.textSecondary,
+                                      width: 2,
+                                    ),
                                   ),
-                                  const SizedBox(width: 8),
+                                  const SizedBox(width: 12),
                                   const Text(
-                                    'Make Favorite',
+                                    'Mark as Favorite',
                                     style: TextStyle(
                                       color: AppColors.textPrimary,
                                       fontSize: 16,
@@ -213,40 +221,46 @@ class _CreateTimerScreenState extends State<CreateTimerScreen> {
                               ),
                             ),
 
-                            const SizedBox(height: 60),
-
-                            // Create Timer Button
-                            Container(
-                              width: double.infinity,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                color: AppColors.buttonBackground,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: ElevatedButton(
-                                onPressed: _createTimer,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.transparent,
-                                  shadowColor: Colors.transparent,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                ),
-                                child: const Text(
-                                  'Create Timer',
-                                  style: TextStyle(
-                                    color: AppColors.buttonText,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
+                            const SizedBox(height: 24),
                           ],
                         ),
                       ),
                     );
                   },
+                ),
+              ),
+
+              // Create Timer Button fixed at the bottom
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 24,
+                ),
+                child: Container(
+                  width: double.infinity,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: AppColors.buttonBackground,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: ElevatedButton(
+                    onPressed: _createTimer,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: const Text(
+                      'Create Timer',
+                      style: TextStyle(
+                        color: AppColors.buttonText,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],

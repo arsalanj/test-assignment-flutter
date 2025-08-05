@@ -10,6 +10,15 @@ class ProjectModel extends Equatable {
     return ProjectModel(id: id ?? this.id, name: name ?? this.name);
   }
 
+  // JSON serialization
+  Map<String, dynamic> toJson() {
+    return {'id': id, 'name': name};
+  }
+
+  factory ProjectModel.fromJson(Map<String, dynamic> json) {
+    return ProjectModel(id: json['id'] as String, name: json['name'] as String);
+  }
+
   @override
   List<Object> get props => [id, name];
 }

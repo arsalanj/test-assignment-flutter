@@ -51,6 +51,40 @@ class TimerModel extends Equatable {
     );
   }
 
+  // JSON serialization
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'description': description,
+      'projectId': projectId,
+      'taskId': taskId,
+      'isRunning': isRunning,
+      'isFavorite': isFavorite,
+      'isCompleted': isCompleted,
+      'startTime': startTime.millisecondsSinceEpoch,
+      'elapsed': elapsed.inMilliseconds,
+      'pausedAt': pausedAt?.millisecondsSinceEpoch,
+    };
+  }
+
+  factory TimerModel.fromJson(Map<String, dynamic> json) {
+    return TimerModel(
+      id: json['id'] as String,
+      description: json['description'] as String,
+      projectId: json['projectId'] as String,
+      taskId: json['taskId'] as String,
+      isRunning: json['isRunning'] as bool,
+      isFavorite: json['isFavorite'] as bool,
+      isCompleted: json['isCompleted'] as bool,
+      startTime: DateTime.fromMillisecondsSinceEpoch(json['startTime'] as int),
+      elapsed: Duration(milliseconds: json['elapsed'] as int),
+      pausedAt:
+          json['pausedAt'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(json['pausedAt'] as int)
+              : null,
+    );
+  }
+
   @override
   List<Object?> get props => [
     id,

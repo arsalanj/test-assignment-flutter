@@ -70,6 +70,41 @@ class TimerLoaded extends TimerState {
     return tasks.where((task) => task.projectId == projectId).toList();
   }
 
+  // JSON serialization
+  Map<String, dynamic> toJson() {
+    return {
+      'timers': timers.map((timer) => timer.toJson()).toList(),
+      'projects': projects.map((project) => project.toJson()).toList(),
+      'tasks': tasks.map((task) => task.toJson()).toList(),
+    };
+  }
+
+  factory TimerLoaded.fromJson(Map<String, dynamic> json) {
+    return TimerLoaded(
+      timers:
+          (json['timers'] as List<dynamic>)
+              .map(
+                (timerJson) =>
+                    TimerModel.fromJson(timerJson as Map<String, dynamic>),
+              )
+              .toList(),
+      projects:
+          (json['projects'] as List<dynamic>)
+              .map(
+                (projectJson) =>
+                    ProjectModel.fromJson(projectJson as Map<String, dynamic>),
+              )
+              .toList(),
+      tasks:
+          (json['tasks'] as List<dynamic>)
+              .map(
+                (taskJson) =>
+                    TaskModel.fromJson(taskJson as Map<String, dynamic>),
+              )
+              .toList(),
+    );
+  }
+
   @override
   List<Object> get props => [timers, projects, tasks];
 }
